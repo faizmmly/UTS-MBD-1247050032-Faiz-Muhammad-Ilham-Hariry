@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres_faizmuhammadilham:
+    container_name: postgres_faizmuhammadilham
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pgdata_faizmuhammadilham:/var/lib/postgresql/data
+    networks:
+      - mbd_network
+
+  pgadmin_faizmuhammadilham:
+    container_name: pgadmin_faizmuhammadilham
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "${PGADMIN_PORT}:80"
+    networks:
+      - mbd_network
+    depends_on:
+      - postgres_faizmuhammadilham
+
+networks:
+  mbd_network:
+    driver: bridge
+
+volumes:
+  pgdata_faizmuhammadilham:
+  
