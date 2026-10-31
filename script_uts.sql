@@ -46,6 +46,15 @@ VALUES (
     5
 )
 
+ON CONFLICT (nim) DO UPDATE 
+SET ipk = 3.71, semester = 5;
+
+-- Catat jejak transaksi ke Audit Log
+INSERT INTO SALAM.activity_logs (action_type, table_name, details)
+VALUES ('INSERT/UPDATE', 'mahasiswas', 'Inisialisasi data mahasiswa Faiz Muhammad Ilham Hariry (NIM: 1247050032)');
+
+SELECT * FROM SALAM.activity_logs;
+
 -- A. Uji Unique Constraint (Email Dobel -> Harus Gagal)
 -- Blok baris ini lalu tekan Ctrl + Enter -> Screenshot Error Red Box
 INSERT INTO SALAM.mahasiswas VALUES ('1247050099', '1247050032@student.uingd.ac.id', 'Mbappe Test', 'Teknik Informatika', 3.50, 3);
@@ -54,12 +63,6 @@ INSERT INTO SALAM.mahasiswas VALUES ('1247050099', '1247050032@student.uingd.ac.
 -- Blok baris ini lalu tekan Ctrl + Enter -> Screenshot Error Red Box
 INSERT INTO SALAM.mahasiswas VALUES ('1247050088', 'messi@student.uingd.ac.id', 'Messi Test', 'Teknik Informatika', 4.50, 3);
 
-ON CONFLICT (nim) DO UPDATE 
-SET ipk = 3.71, semester = 5;
-
--- Catat jejak transaksi ke Audit Log
-INSERT INTO SALAM.activity_logs (action_type, table_name, details)
-VALUES ('INSERT/UPDATE', 'mahasiswas', 'Inisialisasi data mahasiswa Faiz Muhammad Ilham Hariry (NIM: 1247050032)');
 
 
 -- ==========================================
@@ -80,6 +83,8 @@ INSERT INTO SALAM.kehadiran_kuliah (nim, matakuliah, total_pertemuan, jumlah_had
 ('1247050032', 'Jaringan Komputer', 8, 8);
 
 
+SELECT * FROM SALAM.kehadiran_kuliah;
+
 -- ==========================================
 -- FITUR PEMBEDA 3: ANALYTICS VIEW UNTUK ROLE BI_DEV
 -- ==========================================
@@ -92,6 +97,7 @@ SELECT
 FROM SALAM.mahasiswas
 GROUP BY jurusan;
 
+SELECT * FROM SALAM.vw_rekap_akademik;
 
 -- ==========================================
 -- SOAL 4: PEMBUATAN USER & ROLE (RBAC - SS 4.1)
@@ -143,7 +149,7 @@ DROP TABLE SALAM.mahasiswas;
 RESET ROLE;
 
 -- =========================================================
--- PENGUJIAN HAK AKSES data_engineer (SOAL 4c)
+-- PENGUJIAN HAK AKSES data_engineer (SOAL 4.4)
 -- =========================================================
 SET ROLE data_engineer;
 
