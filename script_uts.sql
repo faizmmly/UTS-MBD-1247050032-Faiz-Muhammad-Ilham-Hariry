@@ -49,6 +49,8 @@ VALUES (
 ON CONFLICT (nim) DO UPDATE 
 SET ipk = 3.71, semester = 5;
 
+SELECT * FROM SALAM.mahasiswas WHERE nim = '1247050032';
+
 -- Catat jejak transaksi ke Audit Log
 INSERT INTO SALAM.activity_logs (action_type, table_name, details)
 VALUES ('INSERT/UPDATE', 'mahasiswas', 'Inisialisasi data mahasiswa Faiz Muhammad Ilham Hariry (NIM: 1247050032)');
