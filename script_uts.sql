@@ -63,6 +63,12 @@ INSERT INTO SALAM.mahasiswas VALUES ('1247050099', '1247050032@student.uingd.ac.
 -- Blok baris ini lalu tekan Ctrl + Enter -> Screenshot Error Red Box
 INSERT INTO SALAM.mahasiswas VALUES ('1247050088', 'messi@student.uingd.ac.id', 'Messi Test', 'Teknik Informatika', 4.50, 3);
 
+-- C. Uji Primary Key (NIM Dobel -> Harus Gagal)
+-- Email sengaja dibuat beda supaya yang kena PRIMARY KEY, bukan UNIQUE email
+-- Blok baris ini lalu tekan Ctrl + Enter -> Screenshot Error Red Box
+INSERT INTO SALAM.mahasiswas VALUES ('1247050032', 'email.beda@student.uingd.ac.id', 'Test PK', 'Teknik Informatika', 3.50, 3);
+
+
 
 
 -- ==========================================
@@ -120,6 +126,24 @@ CREATE USER data_engineer WITH PASSWORD 'pass_dataeng032';
 GRANT ALL PRIVILEGES ON SCHEMA SALAM TO data_engineer;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA SALAM TO data_engineer;
 
+-- Tabel dummy milik postgres, untuk bukti DROP objek yang bukan buatan data_engineer
+CREATE TABLE IF NOT EXISTS SALAM.tb_dummy_postgres (id INT);
+
+-- Jadikan data_engineer owner semua objek di schema SALAM agar bisa CREATE, MODIFY, DROP
+ALTER SCHEMA SALAM OWNER TO data_engineer;
+ALTER TABLE SALAM.mahasiswas OWNER TO data_engineer;
+ALTER TABLE SALAM.activity_logs OWNER TO data_engineer;
+ALTER TABLE SALAM.kehadiran_kuliah OWNER TO data_engineer;
+ALTER TABLE SALAM.tb_dummy_postgres OWNER TO data_engineer;
+ALTER VIEW SALAM.vw_rekap_akademik OWNER TO data_engineer;
+
+-- Objek baru buatan data_engineer otomatis bisa diakses role lain
+ALTER DEFAULT PRIVILEGES FOR ROLE data_engineer IN SCHEMA SALAM GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO backend_dev;
+ALTER DEFAULT PRIVILEGES FOR ROLE data_engineer IN SCHEMA SALAM GRANT SELECT ON TABLES TO bi_dev;
+
+SELECT current_user;
+
+SELECT schemaname, tablename, tableowner FROM pg_tables WHERE schemaname = 'salam';
 
 -- ==========================================
 -- PENGUJIAN HAK AKSES bi_dev (UNTUK SS 4.2)
@@ -140,8 +164,19 @@ RESET ROLE;
 -- ==========================================
 SET ROLE backend_dev;
 
+SELECT current_user;
+
 -- a. INSERT Berhasil (Blok 2 baris ini -> Ctrl+Enter -> SS Updated Rows: 1)
 INSERT INTO SALAM.mahasiswas VALUES ('1247050007', 'ronaldo07@student.uingd.ac.id', 'Ronaldo', 'Teknik Informatika', 3.50, 3);
+
+-- a2. SELECT Berhasil
+SELECT * FROM SALAM.mahasiswas;
+
+-- a3. UPDATE Berhasil
+UPDATE SALAM.mahasiswas SET ipk = 3.60 WHERE nim = '1247050007';
+
+-- a4. DELETE Berhasil
+DELETE FROM SALAM.mahasiswas WHERE nim = '1247050007';
 
 -- b. DROP TABLE GAGAL (Blok baris ini -> Ctrl+Enter -> SS Error Red Box)
 DROP TABLE SALAM.mahasiswas;
@@ -149,7 +184,7 @@ DROP TABLE SALAM.mahasiswas;
 RESET ROLE;
 
 -- =========================================================
--- PENGUJIAN HAK AKSES data_engineer (SOAL 4.4)
+-- PENGUJIAN HAK AKSES data_engineer (SOAL SS 4.4)
 -- =========================================================
 SET ROLE data_engineer;
 
@@ -170,6 +205,18 @@ SELECT * FROM SALAM.tb_engineer_test;
 
 -- 5. Uji DDL: DROP TABLE (BERHASIL)
 DROP TABLE SALAM.tb_engineer_test;
+
+-- 6. Uji MODIFY objek milik awal postgres: ALTER TABLE mahasiswas (BERHASIL)
+ALTER TABLE SALAM.mahasiswas ADD COLUMN no_hp VARCHAR(15);
+ALTER TABLE SALAM.mahasiswas ALTER COLUMN no_hp TYPE VARCHAR(20);
+ALTER TABLE SALAM.mahasiswas DROP COLUMN no_hp;
+
+-- 7. Uji CRUD pada tabel mahasiswas (BERHASIL)
+UPDATE SALAM.mahasiswas SET semester = 5 WHERE nim = '1247050032';
+SELECT * FROM SALAM.mahasiswas;
+
+-- 8. Uji DROP objek milik awal postgres (BERHASIL)
+DROP TABLE SALAM.tb_dummy_postgres;
 
 -- Reset Peran Kembali ke Superuser
 RESET ROLE;
